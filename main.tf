@@ -26,7 +26,7 @@ locals {
   vpc_cidr = "10.0.0.0/14"
   zones = {
     0 : { zone : "${var.region}-1", cidr : cidrsubnet(local.vpc_cidr, 2, 0) },
-    1 : { zone : "${var.region}-2", cidr : cidrsubnet(local.vpc_cidr, 2, 1) },
+    # 1 : { zone : "${var.region}-2", cidr : cidrsubnet(local.vpc_cidr, 2, 1) },
   }
   myip = data.external.ifconfig_me.result.ip # replace with your IP if ifconfig.me does not work
   # myip    = "0.0.0.0/0"
