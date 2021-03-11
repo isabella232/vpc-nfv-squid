@@ -28,7 +28,7 @@ FILE_CONTENTS="poorly-behaved"
 
 host_test() {
   host=$1
-  log verify it is possible to ssh to the host and execute the true command
+  log verify it is possible to ssh through the jump host by executing the true command on host.  All subsequent commands jump through.
   ssh_it $host true
 
   # it should be possible to ping the proxy
@@ -50,6 +50,21 @@ host_test() {
   log verify implicit access to a denied host fails
   ssh_it $host "curl virus.com -s | grep squid > /dev/null"
 }
+
+proxy_test() {
+  proxy=$1
+  log verify it is possible to ssh through the jump host by executing the true command on host.  All subsequent commands jump through.
+  ssh_it $proxy true
+
+  log verify that the squid service is running
+  ssh_it $proxy 'set -o pipefail; systemctl is-active squid | grep active'
+
+  log verify curl through the local squid proxy works
+  ssh_it $host "set -o pipefail; curl $FILE_URL -s --proxy localhost:8080 | grep $FILE_CONTENTS > /dev/null"
+}
+
+proxy=$(terraform output -raw ip_proxy)
+proxy_test $proxy
 
 for ip in $(terraform output -json host | jq -r '.[] | .ip_host')
 do
