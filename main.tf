@@ -270,3 +270,7 @@ output "host" {
     }
   ]
 }
+
+output basename {
+  value = var.basename
+}
