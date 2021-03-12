@@ -19,17 +19,23 @@ data "ibm_resource_group" "group" {
 }
 
 locals {
-  proxy_zone_index = 0 # zone for proxy
-  jump_zone_index  = 0 # zone for jump
-  proxy_zone = ibm_is_vpc_address_prefix.prefixes[local.proxy_zone_index].zone
-  jump_zone = ibm_is_vpc_address_prefix.prefixes[local.jump_zone_index].zone
+  # myip = data.external.ifconfig_me.result.ip # ratched down to just your workstation if needed
+  myip    = "0.0.0.0/0"
+
   vpc_cidr = "10.0.0.0/14"
+
   zones = {
     0 : { zone : "${var.region}-1", cidr : cidrsubnet(local.vpc_cidr, 2, 0) },
     # 1 : { zone : "${var.region}-2", cidr : cidrsubnet(local.vpc_cidr, 2, 1) },
   }
-  myip = data.external.ifconfig_me.result.ip # replace with your IP if ifconfig.me does not work
-  # myip    = "0.0.0.0/0"
+
+  proxy_zone_index = 0 # zone for proxy
+  proxy_zone = ibm_is_vpc_address_prefix.prefixes[local.proxy_zone_index].zone
+  proxy_cidr = cidrsubnet(ibm_is_vpc_address_prefix.prefixes[local.proxy_zone_index].cidr, 8, 1)
+
+  jump_zone_index  = 0 # zone for jump
+  jump_zone = ibm_is_vpc_address_prefix.prefixes[local.jump_zone_index].zone
+  jump_cidr = cidrsubnet(ibm_is_vpc_address_prefix.prefixes[local.jump_zone_index].cidr, 8, 2)
 }
 
 #----- vpc, address prefix 
@@ -101,7 +107,7 @@ resource "ibm_is_subnet" "proxy" {
   name            = "${var.basename}-proxy"
   vpc             = ibm_is_vpc.vpc.id
   zone           = local.proxy_zone
-  ipv4_cidr_block = cidrsubnet(local.zones[local.proxy_zone_index].cidr, 8, 1)
+  ipv4_cidr_block = local.proxy_cidr
   resource_group  = data.ibm_resource_group.group.id
   public_gateway = ibm_is_public_gateway.proxy.id
 }
@@ -119,6 +125,7 @@ resource "ibm_is_instance" "proxy" {
     security_groups   = [ibm_is_security_group.sg1.id]
     allow_ip_spoofing = true #---- spoofing is required, squid impersonates the host
   }
+  # hosts can be in all zones
   user_data = replace(file("proxy_user_data.sh"), "__ipv4_cidr_block__", local.vpc_cidr)
 }
 
@@ -143,7 +150,7 @@ resource "ibm_is_subnet" "jump" {
   name           = "${var.basename}-jump"
   vpc             = ibm_is_vpc.vpc.id
   zone           = local.jump_zone
-  ipv4_cidr_block = cidrsubnet(local.zones[local.jump_zone_index].cidr, 8, 2)
+  ipv4_cidr_block = local.jump_cidr
   resource_group  = data.ibm_resource_group.group.id
 }
 

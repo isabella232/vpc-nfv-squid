@@ -1,8 +1,8 @@
 sequenceDiagram
     participant neverssl as neverssl 54.230.125.14
-    participant proxy as proxy 10.0.0.4
-    participant host as host 10.0.1.4
-    host->>proxy: (54.230.125.14) REQ neverssl.com
-    proxy->>neverssl: REQ neverssl.com (pubGW) 
-    neverssl->>proxy: RES neverssl.com (pubGW)
-    proxy->>host: RES (54.230.154.14) neverssl.com
+    participant proxy as proxy 10.0.1.4
+    participant host as host 10.0.0.4
+    host->>proxy: 1 REQ (54.230.125.14) REQ neverssl.com
+    proxy->>neverssl: 2 REQ neverssl.com (pubGW) 
+    neverssl->>proxy: 3 RES neverssl.com (pubGW)
+    proxy->>host: 4 RES (54.230.154.14) neverssl.com

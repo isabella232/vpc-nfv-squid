@@ -4,11 +4,12 @@ set -ex
 echo proxy_user_data
 host_ipv4_cidr_block=__ipv4_cidr_block__ # terraform replace
 if [ $host_ipv4_cidr_block = "__"ipv4_cidr_block__ ]; then
-  host_ipv4_cidr_block=10.0.0.0/8
+  # testing on the proxy, not executed in the instance
+  host_ipv4_cidr_block=10.0.0.0/14
+  cloud-init status --wait
+  cloud-init status
 fi
 
-#cloud-init status --wait
-#cloud-init status
 apt-get update
 apt-get install -y squid
 
