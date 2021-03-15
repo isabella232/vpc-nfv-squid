@@ -11,6 +11,9 @@ check_finish() {
   fi
 }
 
+echo ">>> ibmclouod login"
+ibmcloud login --apikey $TF_VAR_ibmcloud_api_key
+
 echo ">>> Targeting region $TF_VAR_region ..."
 ibmcloud target -r $TF_VAR_region 
 
