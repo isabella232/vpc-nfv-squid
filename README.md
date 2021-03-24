@@ -28,6 +28,7 @@ cp local.env.template local.env
 edit local.env
 source local.env
 ./000-prereq.sh
+./010-create.sh
 ./030-test.sh
 ./040-cleanup.sh
 ```
